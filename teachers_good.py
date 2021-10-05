@@ -34,7 +34,7 @@ def command():
 				elif s == 5:
 					edit_lesson()
 				elif s == 6:
-					delete_teacher()
+					delete()
 				elif s == 7:
 					find_teacher()
 				elif s == 8:
@@ -85,7 +85,7 @@ def add_teacher():
 	subject = input("\nВведите предмет, который преподает учитель: ")
 	print("\nБудет добавлен учитель", name, ", ведущий предмет", subject, ", его опыт работы:", exp)
 	try:
-		conf = int(input("1 - Подтвердить, 2 - Изменить введенные данные, 3 - Выйти из окна добавления учителя "))
+		conf = int(input("\n1 - Подтвердить, 2 - Изменить введенные данные, 3 - Выйти из окна добавления учителя "))
 		if conf < 1 or conf > 3:
 			print("Неизвестная команда. Введите команду еще раз.")
 			add_teacher()
@@ -180,7 +180,7 @@ def edit_teacher():
 			teach = teach.fetchone()[0]
 			print("\nБудет изменен учитель", teach)
 			try:
-				conf = int(input("1 - Подтвердить и ввести новое имя, 2 - Выбрать другого учителя, 3 - Выйти из окна изменения учителя "))
+				conf = int(input("\n1 - Подтвердить и ввести новое имя, 2 - Выбрать другого учителя, 3 - Выйти из окна изменения учителя "))
 				if conf < 1 or conf > 3:
 					print("Неизвестная команда. Введите команду еще раз.")
 					edit_teacher()
@@ -215,48 +215,45 @@ def edit_lesson():
 			print("--------------------------------------------------------------")
 			#maxid = con.execute("SELECT MAX(ID) FROM USER")
 			#maxid = maxid.fetchone()[0]
-			inp_id = int(input('\nВведите id учителя, предмет которого Вы хотите изменить. Введите "q" для выхода в главное меню '))
-			if inp_id =='q':
-				command()
-			else:
-				data = con.execute(f"SELECT ID, LESSON FROM LESSONS WHERE TEACHER_ID = {inp_id}")
-				for row in data:
-					print(row)
-				inp_les_id = int(input('\nВведите id предмета, который Вы хотите изменить. Введите "q" для выхода в главное меню '))
-				teach = con.execute(f"SELECT NAME FROM TEACHERS WHERE ID = {inp_id}")
-				teach = teach.fetchone()[0]
-				les = con.execute(f"SELECT LESSON FROM LESSONS WHERE ID = {inp_les_id}")
-				les = les.fetchone()[0]
-				print("\nБудет изменен предмет ", les, "у учителя", teach)
-				
-				try:
-					conf = int(input("\n1 - Подтвердить изменение, 2 - Выбрать другого учителя или предмет, 3 - Выйти из окна изменения предмета "))
-					if conf < 1 or conf > 3:
-						print("Неизвестная команда. Введите команду еще раз.")
-						edit_lesson()
-					else:
-						if conf == 1:
-							new_les = input("\nВведите новое название предмета, либо нажмите q для отмены ")
-							if new_les =='q':
-								again()
-							else:
-								con.execute(f"UPDATE LESSONS SET LESSON = '{new_les}' WHERE ID = {inp_les_id}")
-								con.execute("commit")
-								print('\nПредмет изменен!')
-								again()
-						elif conf == 2:
-							edit_lesson()
-						elif conf == 3:
-							again()
-				except ValueError:
+			inp_id = int(input('\nВведите id учителя, предмет которого Вы хотите изменить '))
+			print()
+			data = con.execute(f"SELECT ID, LESSON FROM LESSONS WHERE TEACHER_ID = {inp_id}")
+			for row in data:
+				print(row)
+			inp_les_id = int(input('\nВведите id предмета, который Вы хотите изменить '))
+			teach = con.execute(f"SELECT NAME FROM TEACHERS WHERE ID = {inp_id}")
+			teach = teach.fetchone()[0]
+			les = con.execute(f"SELECT LESSON FROM LESSONS WHERE ID = {inp_les_id}")
+			les = les.fetchone()[0]
+			print("\nБудет изменен предмет ", les, "у учителя", teach)
+			try:
+				conf = int(input("\n1 - Подтвердить изменение, 2 - Выбрать другого учителя или предмет, 3 - Выйти из окна изменения предмета "))
+				if conf < 1 or conf > 3:
 					print("Неизвестная команда. Введите команду еще раз.")
 					edit_lesson()
+				else:
+					if conf == 1:
+						new_les = input("\nВведите новое название предмета, либо нажмите q для отмены ")
+						if new_les =='q':
+							again()
+						else:
+							con.execute(f"UPDATE LESSONS SET LESSON = '{new_les}' WHERE ID = {inp_les_id}")
+							con.execute("commit")
+							print('\nПредмет изменен!')
+							again()
+					elif conf == 2:
+						edit_lesson()
+					elif conf == 3:
+						again()
+			except ValueError:
+				print("Неизвестная команда. Введите команду еще раз.")
+				edit_lesson()
 		except OperationalError:
 			print("Таблица в базе данных не найдена!!")
 			again()
 
-def delete_teacher():
-	print("\nУдаление учителя!")
+def delete():
+	print("\nУдаление!")
 	with con:
 		try:
 			print("\n--------------------------------------------------------------")
@@ -268,36 +265,75 @@ def delete_teacher():
 			print("--------------------------------------------------------------")
 			#maxid = con.execute("SELECT MAX(ID) FROM USER")
 			#maxid = maxid.fetchone()[0]
-			inp_id = int(input("\nВведите id учителя, которого хотите удалить "))
-			teach = con.execute(f"SELECT NAME FROM TEACHERS WHERE ID = {inp_id}")
-			teach = teach.fetchone()[0]
-			print("\nБудет удален учитель", teach)
-			try:
-				conf = int(input("\n1 - Подтвердить, 2 - Выбрать другого учителя, 3 - Выйти из окна удаления учителя "))
-				if conf < 1 or conf > 3:
-					print("Неизвестная команда. Введите команду еще раз.")
-					edit_teacher()
-				else:
-					if conf == 1:
-						#sql = f'DELETE FROM USER WHERE ID = {inp_id}'
-						con.execute(f"DELETE FROM TEACHERS WHERE ID = {inp_id}")
-						con.execute(f"DELETE FROM LESSONS WHERE TEACHER_ID = {inp_id}")
-						con.execute("commit")
-						print('\nУчитель удален!')
-						again()
-					elif conf == 2:
-						delete_teacher()
-					elif conf == 3:
-						again()
-			except ValueError:
+			ch = int(input("Введите 1 для удаления учителя, 2 для удаления предмета, 3 для выхода в главное меню "))
+			if ch < 1 or ch > 3:
 				print("Неизвестная команда. Введите команду еще раз.")
-				delete_teacher()
+				delete()
+			elif ch == 1:
+				print("\nУдаление учителя! ")
+				inp_id = int(input("\nВведите id учителя, которого хотите удалить "))
+				teach = con.execute(f"SELECT NAME FROM TEACHERS WHERE ID = {inp_id}")
+				teach = teach.fetchone()[0]
+				print("\nБудет удален учитель", teach)
+				try:
+					conf = int(input("\n1 - Подтвердить, 2 - Выбрать другого учителя, 3 - Выйти из окна удаления учителя "))
+					if conf < 1 or conf > 3:
+						print("Неизвестная команда. Введите команду еще раз.")
+						edit_teacher()
+					else:
+						if conf == 1:
+							#sql = f'DELETE FROM USER WHERE ID = {inp_id}'
+							con.execute(f"DELETE FROM TEACHERS WHERE ID = {inp_id}")
+							con.execute(f"DELETE FROM LESSONS WHERE TEACHER_ID = {inp_id}")
+							con.execute("commit")
+							print('\nУчитель удален!')
+							again()
+						elif conf == 2:
+							delete_teacher()
+						elif conf == 3:
+							again()
+				except ValueError:
+					print("Неизвестная команда. Введите команду еще раз.")
+					delete()
+			elif ch == 2:
+				print("\nУдаление предмета!")
+				inp_id = int(input('\nВведите id учителя, предмет которого Вы хотите удалить '))
+				print()
+				data = con.execute(f"SELECT ID, LESSON FROM LESSONS WHERE TEACHER_ID = {inp_id}")
+				for row in data:
+					print(row)
+				inp_les_id = int(input('\nВведите id предмета, который Вы хотите удалить '))
+				teach = con.execute(f"SELECT NAME FROM TEACHERS WHERE ID = {inp_id}")
+				teach = teach.fetchone()[0]
+				les = con.execute(f"SELECT LESSON FROM LESSONS WHERE ID = {inp_les_id}")
+				les = les.fetchone()[0]
+				print("\nБудет удален предмет ", les, "у учителя", teach)
+				try:
+					conf = int(input("\n1 - Подтвердить удаление, 2 - Выбрать другого учителя или предмет, 3 - Выйти из окна изменения предмета "))
+					if conf < 1 or conf > 3:
+						print("Неизвестная команда. Введите команду еще раз.")
+						edit_lesson()
+					else:
+						if conf == 1:
+							con.execute(f"DELETE FROM LESSONS WHERE ID = {inp_les_id}")
+							con.execute("commit")
+							print('\nПредмет удален!')
+							again()
+						elif conf == 2:
+							delete()
+						elif conf == 3:
+							again()
+				except ValueError:
+					print("Неизвестная команда. Введите команду еще раз.")
+					delete()
+			else:
+				again()
 		except OperationalError:
 			print("Таблица в базе данных не найдена!!")
 			again()
 
 def find_teacher():
-	print("\nПоиск учителя учителя!")
+	print("\nПоиск учителя!")
 	with con:
 		try:
 			query = input("Введите текст, будет произведен поиск ПО ФИО или по предмету, содержащими данный текст ")
@@ -324,13 +360,14 @@ def stats():
 		again()
 			
 def info():
-	print("\nПрограмма 'Учителя', версия 0.1\nРазработчик программы - Алексей Сизов.")
-	print("Тестовый проект базы данных учителей из школы.")
-	print("Программа имеет возможность редактирования, добавления и удаления учителей в базе данныъ школы, также поиск и статистика.")
-	print("По всем вопросам и предложениям пишите на рабочий адрес gipno2009@yandex.ru")
+	print('''\nПрограмма 'Учителя', версия 0.2
+	Разработчик программы - Алексей Сизов.
+	Тестовый проект базы данных учителей из школы.
+	Программа имеет возможность редактирования, добавления и удаления учителей в базе данных школы, также поиск и статистика.
+	По всем вопросам и предложениям пишите на рабочий адрес gipno2009@yandex.ru''')
 	again()
 	
-print("Добрый день, Вас приветствует программа 'Учителя', версия 0.1\nРазработчик программы - Алексей Сизов.")
+print("Добрый день, Вас приветствует программа 'Учителя', версия 0.2\nРазработчик программы - Алексей Сизов.")
 command()
 
 
